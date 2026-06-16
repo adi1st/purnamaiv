@@ -1,0 +1,30 @@
+name: Deploy HTML/CSS to VPS
+
+on:
+  push:
+    branches: [main] # Otomatis jalan saat push ke main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Deployment via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }} # Isinya 'root'
+          key: ${{ secrets.SSH_KEY }} # Kunci privat root Anda
+          port: 22
+          script: |
+            cd /var/www/purnamaiv
+
+            # Paksa menarik kode HTML/CSS terbaru dari GitHub
+            git fetch --all
+            git reset --hard origin/main
+
+            # Pastikan izin folder tetap aman untuk Nginx
+            chown -R www-data:www-data /var/www/purnamaiv
